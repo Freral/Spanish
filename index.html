@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="喵西语">
+<title>喵的西语助手</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f7;--card:#fff;--text:#1f2328;--muted:#6b7280;
+  --line:#e6e8eb;--brand:#2563eb;--brand-soft:#dbeafe;--hl:#fde68a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;
+  min-height:100vh;padding-bottom:env(safe-area-inset-bottom);
+}
+header{
+  position:sticky;top:0;z-index:10;background:var(--card);
+  border-bottom:1px solid var(--line);
+  padding:calc(12px + env(safe-area-inset-top)) 14px 12px;
+}
+h1{font-size:17px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em}
+.search-wrap{position:relative}
+.search{
+  width:100%;padding:12px 40px 12px 14px;font-size:16px;
+  border:1px solid var(--line);border-radius:12px;background:#fafbfc;
+  outline:none;transition:border-color .15s,background .15s,box-shadow .15s;
+  -webkit-appearance:none;appearance:none;font-family:inherit;color:inherit;
+}
+.search:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+.search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border:none;background:transparent;color:var(--muted);
+  font-size:20px;line-height:1;cursor:pointer;border-radius:50%;
+  display:none;align-items:center;justify-content:center;padding:0;
+}
+.search-clear:hover{background:#f0f1f3}
+.search-wrap.has-value .search-clear{display:flex}
+.toolbar{
+  display:flex;gap:8px;align-items:center;margin-top:10px;
+  flex-wrap:wrap;font-size:13px;color:var(--muted);
+}
+.toolbar label{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
+.toolbar input[type=checkbox]{width:15px;height:15px;accent-color:var(--brand);margin:0}
+.toolbar .sep{flex:1}
+.toolbar .stat{font-variant-numeric:tabular-nums}
+main{padding:14px;max-width:720px;margin:0 auto}
+.card{
+  background:var(--card);border-radius:14px;margin-bottom:12px;
+  overflow:hidden;border:1px solid var(--line);
+}
+.card-title{
+  padding:12px 16px 10px;font-size:20px;font-weight:600;color:var(--brand);
+  letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+}
+.card-title .badge{
+  font-size:11px;font-weight:500;color:var(--muted);background:#f0f1f3;
+  padding:2px 8px;border-radius:10px;letter-spacing:0;
+}
+.word-info{padding:10px 16px 12px;background:#fafbfc;border-bottom:1px solid var(--line)}
+.word-entry{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:2px 0;flex-wrap:wrap}
+.word-entry .pos{
+  color:var(--brand);font-weight:600;font-size:12px;
+  padding:1px 6px;background:var(--brand-soft);border-radius:4px;flex-shrink:0;
+}
+.word-entry .meaning{color:var(--text)}
+.example{color:var(--muted);font-style:italic;font-size:13px;padding:4px 0 2px}
+.note{color:var(--muted);font-size:12px;padding:2px 0}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.conj-table{width:100%;border-collapse:collapse;font-size:14px}
+.conj-table th{
+  text-align:left;font-size:11px;font-weight:600;color:var(--muted);
+  letter-spacing:.04em;padding:8px 10px;
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.conj-table td{padding:9px 10px;border-bottom:1px solid #f1f2f4;vertical-align:top}
+.conj-table tr:last-child td{border-bottom:none}
+.conj-table .form{font-weight:500;color:var(--text)}
+.conj-table .form.empty{color:#c8ccd2;font-weight:400}
+.conj-table .person{
+  font-weight:500;color:var(--muted);font-size:13px;
+  white-space:nowrap;width:1%;
+  position:sticky;left:0;
+  background:#fff;
+  z-index:2;
+  border-right:1px solid var(--line);
+}
+.conj-table thead .person{
+  background:#fafbfc;
+  z-index:3;
+}
+mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+.empty-state .emoji{font-size:40px;margin-bottom:12px;opacity:.5}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+.file-input{display:none}
+.upload-hint{text-align:center;padding:40px 20px}
+.upload-hint p{color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.7}
+.btn{
+  display:inline-block;padding:10px 20px;background:var(--brand);color:#fff;
+  border:none;border-radius:10px;font-size:14px;font-weight:500;
+  cursor:pointer;font-family:inherit;
+}
+.btn:active{opacity:.85}
+@media (min-width:600px){
+  h1{font-size:19px}
+  .conj-table{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>喵的西语助手</h1>
+  <div class="search-wrap" id="searchWrap">
+    <input type="text" inputmode="search" class="search" id="search"
+           placeholder="输入单词或变位，如 hablar、hablo、房子"
+           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="search-clear" id="clear" aria-label="清除">×</button>
+  </div>
+  <div class="toolbar">
+    <label><input type="checkbox" id="ignoreAccents" checked> 忽略重音</label>
+    <span class="sep"></span>
+    <span class="stat" id="stat"></span>
+  </div>
+</header>
+
+<main id="main">
+  <div class="loading">加载中…</div>
+</main>
+
+<input type="file" class="file-input" id="fileInput"
+       accept=".xlsx,.xls,.csv" multiple>
+
+<script>
+(function(){
+'use strict';
+
+const ACCENT_MAP = {
+  'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u','ñ':'n',
+  'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ü':'U','Ñ':'N'
+};
+const stripAccents = s => String(s).replace(/[áéíóúüñÁÉÍÓÚÜÑ]/g, c => ACCENT_MAP[c]);
+const norm = (s, ia) => (ia ? stripAccents(s) : String(s)).toLowerCase();
+const escapeHtml = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isJunkCol = k => !k || /^__EMPTY/.test(k) || /^_+$/.test(k);
+
+function highlight(text, query, ia){
+  const t = String(text ?? '');
+  if (!query) return escapeHtml(t);
+  const nt = norm(t, ia), nq = norm(query, ia);
+  if (!nq) return escapeHtml(t);
+  let i = nt.indexOf(nq), last = 0, out = '';
+  if (i < 0) return escapeHtml(t);
+  while (i >= 0){
+    out += escapeHtml(t.slice(last, i)) + '<mark>' + escapeHtml(t.slice(i, i + nq.length)) + '</mark>';
+    last = i + nq.length;
+    i = nt.indexOf(nq, last);
+  }
+  return out + escapeHtml(t.slice(last));
+}
+
+const PERSONS = ['yo', 'tú', 'usted', 'nosotros', 'vosotros', 'ustedes'];
+
+const TENSE_COLORS = [
+  { head:'#d8e5d2', cell:'#eff5ed' },
+  { head:'#d5e2ec', cell:'#eef4f8' },
+  { head:'#e3d8de', cell:'#f5f0f4' },
+  { head:'#e8e2d5', cell:'#f6f3ec' },
+  { head:'#dce6e2', cell:'#f0f5f3' },
+  { head:'#e6dde5', cell:'#f4eff3' },
+  { head:'#e8ddd3', cell:'#f5f0ea' },
+  { head:'#dde4e8', cell:'#f0f4f6' }
+];
+const colorFor = i => TENSE_COLORS[i % TENSE_COLORS.length];
+
+let VERBS = new Map();
+let WORDS = new Map();
+let WORDS_INDEX = new Map();
+let TENSE_COLS = [];
+
+const TENSE_LABELS = {
+  '陈述式现在时': '现在时',
+  '陈述式简单过去时': '简单过去时',
+  '肯定命令式': '命令式'
+};
+const tenseLabel = t => TENSE_LABELS[t] || t;
+
+const els = {
+  main: document.getElementById('main'),
+  search: document.getElementById('search'),
+  clear: document.getElementById('clear'),
+  searchWrap: document.getElementById('searchWrap'),
+  ignoreAccents: document.getElementById('ignoreAccents'),
+  stat: document.getElementById('stat'),
+  fileInput: document.getElementById('fileInput')
+};
+
+function parseRows(buffer){
+  const wb = XLSX.read(new Uint8Array(buffer), { type:'array', cellDates:true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
+  return raw.map(r => {
+    const o = {};
+    for (const k of Object.keys(r)){
+      const key = String(k).trim();
+      if (!isJunkCol(key)) o[key] = r[k];
+    }
+    return o;
+  });
+}
+
+function detectFileType(rows){
+  if (!rows.length) return null;
+  const cols = Object.keys(rows[0]);
+  if (cols.includes('动词') && cols.includes('人称')) return 'conj';
+  if (cols.includes('单词')) return 'words';
+  return null;
+}
+
+function buildVerbs(rows){
+  const verbs = new Map();
+  TENSE_COLS = [];
+  if (!rows.length) return verbs;
+
+  const cols = Object.keys(rows[0]);
+  const VERB_COL = '动词';
+  const PERSON_COL = '人称';
+  TENSE_COLS = cols.filter(c => c !== VERB_COL && c !== PERSON_COL && !isJunkCol(c));
+
+  let currentVerb = '';
+  let personIndex = 0;
+
+  for (const row of rows){
+    const v = String(row[VERB_COL] ?? '').trim();
+    if (v){
+      currentVerb = v;
+      personIndex = 0;
+    }
+    if (!currentVerb) continue;
+
+    let person = String(row[PERSON_COL] ?? '').trim();
+    if (person){
+      const idx = PERSONS.indexOf(person.toLowerCase());
+      if (idx >= 0) personIndex = idx;
+    } else {
+      person = PERSONS[personIndex % PERSONS.length];
+    }
+    personIndex++;
+
+    if (!verbs.has(currentVerb)){
+      verbs.set(currentVerb, { verb: currentVerb, rows: new Map() });
+    }
+    const data = verbs.get(currentVerb);
+    const tenses = {};
+    for (const t of TENSE_COLS) tenses[t] = String(row[t] ?? '').trim();
+    data.rows.set(person, tenses);
+  }
+  return verbs;
+}
+
+function buildWords(rows){
+  const words = new Map();
+  if (!rows.length) return words;
+
+  const cols = Object.keys(rows[0]);
+  const WORD_COL = cols.includes('单词') ? '单词' : cols[0];
+  const POS_COL = '词性';
+  const MEAN_COL = '意思';
+  const EX_COL = '例句';
+  const NOTE_COL = '备注';
+
+  let currentWord = '';
+  for (const row of rows){
+    const w = String(row[WORD_COL] ?? '').trim();
+    if (w) currentWord = w;
+    if (!currentWord) continue;
+
+    if (!words.has(currentWord)) words.set(currentWord, { word: currentWord, entries: [] });
+    const entry = {
+      pos: String(row[POS_COL] ?? '').trim(),
+      meaning: String(row[MEAN_COL] ?? '').trim(),
+      example: String(row[EX_COL] ?? '').trim(),
+      note: String(row[NOTE_COL] ?? '').trim()
+    };
+    if (entry.pos || entry.meaning || entry.example || entry.note){
+      words.get(currentWord).entries.push(entry);
+    }
+  }
+  return words;
+}
+
+function rebuildWordsIndex(){
+  WORDS_INDEX = new Map();
+  for (const k of WORDS.keys()) WORDS_INDEX.set(stripAccents(k).toLowerCase(), k);
+}
+
+function findWord(word){
+  if (!word) return null;
+  if (WORDS.has(word)) return WORDS.get(word);
+  const lower = word.toLowerCase();
+  if (WORDS.has(lower)) return WORDS.get(lower);
+  const key = WORDS_INDEX.get(stripAccents(word).toLowerCase());
+  if (key) return WORDS.get(key);
+  return null;
+}
+
+function search(query, ia){
+  const q = norm(query, ia).trim();
+  const results = [];
+  const seen = new Set();
+
+  if (!q){
+    for (const data of VERBS.values()) results.push({ type:'verb', data, rank:9 });
+    return results;
+  }
+
+  for (const data of VERBS.values()){
+    const vn = norm(data.verb, ia);
+    let rank = -1;
+    if (vn === q) rank = 0;
+    else if (vn.startsWith(q)) rank = 1;
+    else if (vn.includes(q)) rank = 2;
+
+    if (rank >= 0){
+      results.push({ type:'verb', data, rank });
+      seen.add(data.verb);
+      continue;
+    }
+
+    let found = null;
+    outer:
+    for (const [person, tenses] of data.rows){
+      for (const t of TENSE_COLS){
+        const form = tenses[t];
+        if (form && norm(form, ia).includes(q)){
+          found = { person, tense:t, form };
+          break outer;
+        }
+      }
+    }
+    if (found){
+      results.push({ type:'verb', data, match:found, rank:3 });
+      seen.add(data.verb);
+    }
+  }
+
+  for (const data of WORDS.values()){
+    if (seen.has(data.word)) continue;
+    const wn = norm(data.word, ia);
+    let rank = -1;
+    if (wn === q) rank = 0;
+    else if (wn.startsWith(q)) rank = 1;
+    else if (wn.includes(q)) rank = 2;
+    else {
+      for (const e of data.entries){
+        if (e.meaning && norm(e.meaning, ia).includes(q)){ rank = 4; break; }
+      }
+    }
+    if (rank >= 0) results.push({ type:'word', data, rank });
+  }
+
+  results.sort((a,b) => a.rank - b.rank);
+  return results;
+}
+
+function renderWordInfo(wordData, query, ia, showExtra){
+  const info = document.createElement('div');
+  info.className = 'word-info';
+  for (const e of wordData.entries){
+    const row = document.createElement('div');
+    row.className = 'word-entry';
+    let html = '';
+    if (e.pos) html += `<span class="pos">${highlight(e.pos, query, ia)}</span>`;
+    if (e.meaning) html += `<span class="meaning">${highlight(e.meaning, query, ia)}</span>`;
+    if (html){
+      row.innerHTML = html;
+      info.appendChild(row);
+    }
+    if (showExtra && e.example){
+      const ex = document.createElement('div');
+      ex.className = 'example';
+      ex.innerHTML = highlight(e.example, query, ia);
+      info.appendChild(ex);
+    }
+    if (showExtra && e.note){
+      const note = document.createElement('div');
+      note.className = 'note';
+      note.innerHTML = '📝 ' + highlight(e.note, query, ia);
+      info.appendChild(note);
+    }
+  }
+  return info;
+}
+
+function renderVerbCard(data, query, ia, match){
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  const badge = match
+    ? `<span class="badge">${escapeHtml(match.person)} · ${escapeHtml(tenseLabel(match.tense))}</span>`
+    : '';
+  title.innerHTML = highlight(data.verb, query, ia) + badge;
+  card.appendChild(title);
+
+  const wordData = findWord(data.verb);
+  if (wordData && wordData.entries.length){
+    card.appendChild(renderWordInfo(wordData, query, ia, true));
+  }
+
+  const scroll = document.createElement('div');
+  scroll.className = 'table-scroll';
+
+  const table = document.createElement('table');
+  table.className = 'conj-table';
+
+  let headHtml = '<th class="person">人称</th>';
+  TENSE_COLS.forEach((t, i) => {
+    const c = colorFor(i);
+    headHtml += `<th style="background:${c.head}">${escapeHtml(tenseLabel(t))}</th>`;
+  });
+  table.innerHTML = `<thead><tr>${headHtml}</tr></thead>`;
+
+  const tbody = document.createElement('tbody');
+  for (const person of PERSONS){
+    const tenses = data.rows.get(person);
+    if (!tenses) continue;
+    const tr = document.createElement('tr');
+    let html = `<td class="person">${escapeHtml(person)}</td>`;
+    TENSE_COLS.forEach((t, i) => {
+      const form = tenses[t];
+      if (!form){
+        html += `<td class="form empty">—</td>`;
+      } else {
+        const c = colorFor(i);
+        html += `<td class="form" style="background:${c.cell}">${highlight(form, query, ia)}</td>`;
+      }
+    });
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+
+  scroll.appendChild(table);
+  card.appendChild(scroll);
+
+  return card;
+}
+
+function renderWordCard(data, query, ia){
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.innerHTML = highlight(data.word, query, ia);
+  card.appendChild(title);
+
+  card.appendChild(renderWordInfo(data, query, ia, true));
+  return card;
+}
+
+function renderUploadPrompt(){
+  els.main.innerHTML = `
+    <div class="upload-hint">
+      <p>还没有数据。<br>请把 <b>conj.xlsx</b> 和 <b>words.xlsx</b> 放在本页同目录，<br>或手动选择文件导入。</p>
+      <button class="btn" id="btnPick">选择文件</button>
+    </div>`;
+  document.getElementById('btnPick').onclick = () => els.fileInput.click();
+  els.stat.textContent = '';
+}
+
+function render(){
+  const query = els.search.value.trim();
+  const ia = els.ignoreAccents.checked;
+  els.searchWrap.classList.toggle('has-value', !!query);
+
+  if (VERBS.size === 0 && WORDS.size === 0){
+    renderUploadPrompt();
+    return;
+  }
+
+  const results = search(query, ia);
+
+  if (results.length === 0){
+    els.main.innerHTML =
+      `<div class="empty-state"><div class="emoji">🔍</div>没有找到「${escapeHtml(query)}」</div>`;
+    els.stat.textContent = '0 个结果';
+    return;
+  }
+
+  els.main.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  for (const r of results){
+    frag.appendChild(r.type === 'verb'
+      ? renderVerbCard(r.data, query, ia, r.match)
+      : renderWordCard(r.data, query, ia));
+  }
+  els.main.appendChild(frag);
+
+  els.stat.textContent = query
+    ? `${results.length} 个结果`
+    : `${VERBS.size} 个动词`;
+}
+
+async function loadFromUrl(url){
+  try{
+    const res = await fetch(url, { cache:'no-store' });
+    if (!res.ok) return null;
+    const rows = parseRows(await res.arrayBuffer());
+    const type = detectFileType(rows);
+    if (!type) return null;
+    if (type === 'conj') VERBS = buildVerbs(rows);
+    else { WORDS = buildWords(rows); rebuildWordsIndex(); }
+    return type;
+  }catch(e){ return null; }
+}
+
+async function loadFromFile(file){
+  const rows = parseRows(await file.arrayBuffer());
+  const type = detectFileType(rows);
+  if (!type) return null;
+  if (type === 'conj') VERBS = buildVerbs(rows);
+  else { WORDS = buildWords(rows); rebuildWordsIndex(); }
+  return type;
+}
+
+let timer = null;
+els.search.addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(render, 120);
+});
+
+els.clear.addEventListener('click', () => {
+  els.search.value = '';
+  els.search.focus();
+  render();
+});
+
+els.ignoreAccents.addEventListener('change', render);
+
+els.fileInput.addEventListener('change', async e => {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  for (const f of files){
+    try{
+      const type = await loadFromFile(f);
+      if (!type) alert(`${f.name}：无法识别（需要是变位表或单词表）`);
+    }catch(err){
+      alert(`读取 ${f.name} 失败：${err.message}`);
+    }
+  }
+  e.target.value = '';
+  render();
+});
+
+(async function init(){
+  await loadFromUrl('conj.xlsx');
+  await loadFromUrl('words.xlsx');
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
