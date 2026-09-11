@@ -144,6 +144,9 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
 (function(){
 'use strict';
 
+/* ============================================================
+   工具函数
+   ============================================================ */
 const ACCENT_MAP = {
   'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u','ñ':'n',
   'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U','Ü':'U','Ñ':'N'
@@ -182,6 +185,9 @@ const TENSE_COLORS = [
 ];
 const colorFor = i => TENSE_COLORS[i % TENSE_COLORS.length];
 
+/* ============================================================
+   状态
+   ============================================================ */
 let VERBS = new Map();
 let WORDS = new Map();
 let WORDS_INDEX = new Map();
@@ -204,9 +210,10 @@ const els = {
   fileInput: document.getElementById('fileInput')
 };
 
-function parseRows(buffer){
-  const wb = XLSX.read(new Uint8Array(buffer), { type:'array', cellDates:true });
-  const ws = wb.Sheets[wb.SheetNames[0]];
+/* ============================================================
+   解析 Excel
+   ============================================================ */
+function sheetToRows(ws){
   const raw = XLSX.utils.sheet_to_json(ws, { defval:'', raw:false });
   return raw.map(r => {
     const o = {};
@@ -216,6 +223,16 @@ function parseRows(buffer){
     }
     return o;
   });
+}
+
+function parseAllSheets(buffer){
+  const wb = XLSX.read(new Uint8Array(buffer), { type:'array', cellDates:true });
+  const result = [];
+  for (const name of wb.SheetNames){
+    const rows = sheetToRows(wb.Sheets[name]);
+    if (rows.length) result.push({ sheetName: name, rows });
+  }
+  return result;
 }
 
 function detectFileType(rows){
@@ -313,6 +330,9 @@ function findWord(word){
   return null;
 }
 
+/* ============================================================
+   搜索
+   ============================================================ */
 function search(query, ia){
   const q = norm(query, ia).trim();
   const results = [];
@@ -372,6 +392,9 @@ function search(query, ia){
   return results;
 }
 
+/* ============================================================
+   渲染
+   ============================================================ */
 function renderWordInfo(wordData, query, ia, showExtra){
   const info = document.createElement('div');
   info.className = 'word-info';
@@ -473,7 +496,7 @@ function renderWordCard(data, query, ia){
 function renderUploadPrompt(){
   els.main.innerHTML = `
     <div class="upload-hint">
-      <p>还没有数据。<br>请把 <b>conj.xlsx</b> 和 <b>words.xlsx</b> 放在本页同目录，<br>或手动选择文件导入。</p>
+      <p>还没有数据。<br>请把 <b>spanish.xlsx</b> 放在本页同目录，<br>或手动选择文件导入。</p>
       <button class="btn" id="btnPick">选择文件</button>
     </div>`;
   document.getElementById('btnPick').onclick = () => els.fileInput.click();
@@ -513,28 +536,34 @@ function render(){
     : `${VERBS.size} 个动词`;
 }
 
-async function loadFromUrl(url){
+/* ============================================================
+   加载
+   ============================================================ */
+function absorbSheets(sheets){
+  let got = false;
+  for (const s of sheets){
+    const type = detectFileType(s.rows);
+    if (type === 'conj'){ VERBS = buildVerbs(s.rows); got = true; }
+    else if (type === 'words'){ WORDS = buildWords(s.rows); rebuildWordsIndex(); got = true; }
+  }
+  return got;
+}
+
+async function loadSingleFromUrl(url){
   try{
     const res = await fetch(url, { cache:'no-store' });
-    if (!res.ok) return null;
-    const rows = parseRows(await res.arrayBuffer());
-    const type = detectFileType(rows);
-    if (!type) return null;
-    if (type === 'conj') VERBS = buildVerbs(rows);
-    else { WORDS = buildWords(rows); rebuildWordsIndex(); }
-    return type;
-  }catch(e){ return null; }
+    if (!res.ok) return false;
+    return absorbSheets(parseAllSheets(await res.arrayBuffer()));
+  }catch(e){ return false; }
 }
 
-async function loadFromFile(file){
-  const rows = parseRows(await file.arrayBuffer());
-  const type = detectFileType(rows);
-  if (!type) return null;
-  if (type === 'conj') VERBS = buildVerbs(rows);
-  else { WORDS = buildWords(rows); rebuildWordsIndex(); }
-  return type;
+async function loadSingleFromFile(file){
+  return absorbSheets(parseAllSheets(await file.arrayBuffer()));
 }
 
+/* ============================================================
+   事件
+   ============================================================ */
 let timer = null;
 els.search.addEventListener('input', () => {
   clearTimeout(timer);
@@ -554,8 +583,8 @@ els.fileInput.addEventListener('change', async e => {
   if (!files.length) return;
   for (const f of files){
     try{
-      const type = await loadFromFile(f);
-      if (!type) alert(`${f.name}：无法识别（需要是变位表或单词表）`);
+      const ok = await loadSingleFromFile(f);
+      if (!ok) alert(`${f.name}：无法识别（需要包含变位表或单词表）`);
     }catch(err){
       alert(`读取 ${f.name} 失败：${err.message}`);
     }
@@ -564,9 +593,17 @@ els.fileInput.addEventListener('change', async e => {
   render();
 });
 
+/* ============================================================
+   启动
+   ============================================================ */
 (async function init(){
-  await loadFromUrl('conj.xlsx');
-  await loadFromUrl('words.xlsx');
+  // 优先读合并后的单文件
+  const ok = await loadSingleFromUrl('spanish.xlsx');
+  // 兼容旧结构（如果单文件还没上传）
+  if (!ok){
+    await loadSingleFromUrl('conj.xlsx');
+    await loadSingleFromUrl('words.xlsx');
+  }
   render();
 })();
 
