@@ -14,39 +14,57 @@
 :root{
   --bg:#f4f5f7;--card:#fff;--text:#1f2328;--muted:#6b7280;
   --line:#e6e8eb;--brand:#2563eb;--brand-soft:#dbeafe;--hl:#fde68a;
+  --fs:1;
+}
+body.dark{
+  --bg:#14161a;--card:#1e2126;--text:#e6e8eb;--muted:#9aa0a8;
+  --line:#2b2f36;--brand:#5b9bff;--brand-soft:#1c3457;--hl:#6b5a1a;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-  background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;
+  background:var(--bg);color:var(--text);
+  font-size:calc(15px * var(--fs));line-height:1.5;
   min-height:100vh;padding-bottom:env(safe-area-inset-bottom);
+  transition:background .2s,color .2s;
 }
 header{
   position:sticky;top:0;z-index:10;background:var(--card);
   border-bottom:1px solid var(--line);
-  padding:calc(12px + env(safe-area-inset-top)) 14px 12px;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 10px;
 }
-h1{font-size:17px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em}
+.head-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+h1{font-size:calc(17px * var(--fs));margin:0;font-weight:600;letter-spacing:-.01em;flex:1}
+.head-actions{display:flex;gap:4px;align-items:center}
+.icon-btn{
+  width:34px;height:34px;border:none;background:transparent;color:var(--muted);
+  font-size:15px;font-weight:600;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding:0;
+  font-family:inherit;transition:background .15s,color .15s;
+}
+.icon-btn:hover{background:var(--bg);color:var(--text)}
+.icon-btn.on{color:#e8a020}
 .search-wrap{position:relative}
 .search{
-  width:100%;padding:12px 40px 12px 14px;font-size:16px;
-  border:1px solid var(--line);border-radius:12px;background:#fafbfc;
-  outline:none;transition:border-color .15s,background .15s,box-shadow .15s;
-  -webkit-appearance:none;appearance:none;font-family:inherit;color:inherit;
+  width:100%;padding:11px 40px 11px 14px;font-size:calc(16px * var(--fs));
+  border:1px solid var(--line);border-radius:12px;background:var(--bg);
+  outline:none;color:var(--text);font-family:inherit;
+  transition:border-color .15s,box-shadow .15s;
+  -webkit-appearance:none;appearance:none;
 }
-.search:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+.search:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
 .search-clear{
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  width:28px;height:28px;border:none;background:transparent;color:var(--muted);
-  font-size:20px;line-height:1;cursor:pointer;border-radius:50%;
+  width:26px;height:26px;border:none;background:transparent;color:var(--muted);
+  font-size:19px;line-height:1;cursor:pointer;border-radius:50%;
   display:none;align-items:center;justify-content:center;padding:0;
 }
-.search-clear:hover{background:#f0f1f3}
+.search-clear:hover{background:var(--line)}
 .search-wrap.has-value .search-clear{display:flex}
 .toolbar{
-  display:flex;gap:8px;align-items:center;margin-top:10px;
-  flex-wrap:wrap;font-size:13px;color:var(--muted);
+  display:flex;gap:8px;align-items:center;margin-top:9px;
+  font-size:calc(13px * var(--fs));color:var(--muted);
 }
 .toolbar label{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
 .toolbar input[type=checkbox]{width:15px;height:15px;accent-color:var(--brand);margin:0}
@@ -58,68 +76,122 @@ main{padding:14px;max-width:720px;margin:0 auto}
   overflow:hidden;border:1px solid var(--line);
 }
 .card-title{
-  padding:12px 16px 10px;font-size:20px;font-weight:600;color:var(--brand);
-  letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  padding:12px 14px 10px;font-size:calc(20px * var(--fs));font-weight:600;
+  color:var(--brand);letter-spacing:-.01em;
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
 }
 .card-title .badge{
-  font-size:11px;font-weight:500;color:var(--muted);background:#f0f1f3;
-  padding:2px 8px;border-radius:10px;letter-spacing:0;
+  font-size:calc(11px * var(--fs));font-weight:500;color:var(--muted);
+  background:var(--bg);padding:2px 8px;border-radius:10px;letter-spacing:0;
 }
-.word-info{padding:10px 16px 12px;background:#fafbfc;border-bottom:1px solid var(--line)}
-.word-entry{display:flex;align-items:baseline;gap:8px;font-size:14px;padding:2px 0;flex-wrap:wrap}
+.card-title .star{
+  margin-left:auto;border:none;background:transparent;cursor:pointer;
+  font-size:20px;line-height:1;color:#c8ccd2;padding:0 2px;
+  transition:color .15s,transform .1s;
+}
+.card-title .star:hover{transform:scale(1.15)}
+.card-title .star.on{color:#e8a020}
+.word-info{padding:10px 14px 12px;background:var(--bg);border-bottom:1px solid var(--line)}
+.word-entry{display:flex;align-items:baseline;gap:8px;font-size:calc(14px * var(--fs));padding:2px 0;flex-wrap:wrap}
 .word-entry .pos{
-  color:var(--brand);font-weight:600;font-size:12px;
+  color:var(--brand);font-weight:600;font-size:calc(12px * var(--fs));
   padding:1px 6px;background:var(--brand-soft);border-radius:4px;flex-shrink:0;
 }
-.word-entry .meaning{color:var(--text)}
-.example{color:var(--muted);font-style:italic;font-size:13px;padding:4px 0 2px}
-.note{color:var(--muted);font-size:12px;padding:2px 0}
+.example{color:var(--muted);font-style:italic;font-size:calc(13px * var(--fs));padding:4px 0 2px}
+.note{color:var(--muted);font-size:calc(12px * var(--fs));padding:2px 0}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.conj-table{width:100%;border-collapse:collapse;font-size:14px}
+.conj-table{width:100%;border-collapse:collapse;font-size:calc(14px * var(--fs))}
 .conj-table th{
-  text-align:left;font-size:11px;font-weight:600;color:var(--muted);
-  letter-spacing:.04em;padding:8px 10px;
+  text-align:left;font-size:calc(11px * var(--fs));font-weight:600;color:var(--muted);
+  letter-spacing:.04em;padding:8px 10px;background:var(--bg);
   border-bottom:1px solid var(--line);white-space:nowrap;
 }
-.conj-table td{padding:9px 10px;border-bottom:1px solid #f1f2f4;vertical-align:top}
+.conj-table td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .conj-table tr:last-child td{border-bottom:none}
 .conj-table .form{font-weight:500;color:var(--text)}
-.conj-table .form.empty{color:#c8ccd2;font-weight:400}
+.conj-table .form.empty{color:#c8ccd2;background:transparent !important}
 .conj-table .person{
-  font-weight:500;color:var(--muted);font-size:13px;
+  font-weight:500;color:var(--muted);font-size:calc(13px * var(--fs));
   white-space:nowrap;width:1%;
-  position:sticky;left:0;
-  background:#fff;
-  z-index:2;
+  position:sticky;left:0;background:var(--card);z-index:2;
   border-right:1px solid var(--line);
 }
-.conj-table thead .person{
-  background:#fafbfc;
-  z-index:3;
+.conj-table thead .person{background:var(--bg);z-index:3}
+/* 时态列配色 */
+.t0{--head:#d8e5d2;--cell:#eff5ed}
+.t1{--head:#d5e2ec;--cell:#eef4f8}
+.t2{--head:#e3d8de;--cell:#f5f0f4}
+.t3{--head:#e8e2d5;--cell:#f6f3ec}
+.t4{--head:#dce6e2;--cell:#f0f5f3}
+.t5{--head:#e6dde5;--cell:#f4eff3}
+.t6{--head:#e8ddd3;--cell:#f5f0ea}
+.t7{--head:#dde4e8;--cell:#f0f4f6}
+body.dark .t0{--head:#2d3b2a;--cell:#1d2419}
+body.dark .t1{--head:#25313d;--cell:#1a2229}
+body.dark .t2{--head:#362b31;--cell:#221c20}
+body.dark .t3{--head:#3a342a;--cell:#242019}
+body.dark .t4{--head:#28332f;--cell:#1a211e}
+body.dark .t5{--head:#332c32;--cell:#201c20}
+body.dark .t6{--head:#3a3129;--cell:#241f1a}
+body.dark .t7{--head:#2b3338;--cell:#1a2024}
+th[class*="t"]{background:var(--head)}
+td.form[class*="t"]{background:var(--cell)}
+/* 字母分组 */
+.letter-group{margin-bottom:14px}
+.letter-head{
+  position:sticky;top:0;z-index:4;
+  font-size:calc(13px * var(--fs));font-weight:700;color:var(--muted);
+  letter-spacing:.12em;padding:6px 10px;margin-bottom:6px;
+  background:var(--bg);border-bottom:1px solid var(--line);
+  border-radius:6px;
 }
+.list-item{
+  display:flex;align-items:baseline;gap:10px;
+  padding:10px 14px;background:var(--card);
+  border-radius:10px;margin-bottom:4px;cursor:pointer;
+  border:1px solid var(--line);
+  transition:background .1s,border-color .1s;
+  font-size:calc(14px * var(--fs));
+}
+.list-item:hover{border-color:var(--brand)}
+.list-item .li-word{font-weight:600;color:var(--text);flex-shrink:0}
+.list-item .li-mean{
+  color:var(--muted);font-size:calc(13px * var(--fs));
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
+}
+.list-item.expanded{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;border-color:var(--brand)}
+.list-item.expanded + .card{border-top-left-radius:0;border-top-right-radius:0;border-top:none;margin-top:0}
 mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);font-size:calc(14px * var(--fs))}
 .empty-state .emoji{font-size:40px;margin-bottom:12px;opacity:.5}
-.loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:calc(14px * var(--fs))}
 .file-input{display:none}
 .upload-hint{text-align:center;padding:40px 20px}
-.upload-hint p{color:var(--muted);font-size:14px;margin:0 0 16px;line-height:1.7}
+.upload-hint p{color:var(--muted);font-size:calc(14px * var(--fs));margin:0 0 16px;line-height:1.7}
 .btn{
   display:inline-block;padding:10px 20px;background:var(--brand);color:#fff;
-  border:none;border-radius:10px;font-size:14px;font-weight:500;
+  border:none;border-radius:10px;font-size:calc(14px * var(--fs));font-weight:500;
   cursor:pointer;font-family:inherit;
 }
 .btn:active{opacity:.85}
 @media (min-width:600px){
-  h1{font-size:19px}
-  .conj-table{font-size:15px}
+  h1{font-size:calc(19px * var(--fs))}
+  .conj-table{font-size:calc(15px * var(--fs))}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>喵的西语助手</h1>
+  <div class="head-row">
+    <h1>喵的西语助手</h1>
+    <div class="head-actions">
+      <button class="icon-btn" id="btnTheme" title="深色模式">🌙</button>
+      <button class="icon-btn" id="btnFontDown" title="缩小字号">A-</button>
+      <button class="icon-btn" id="btnFontUp" title="放大字号">A+</button>
+      <button class="icon-btn" id="btnFav" title="只看收藏">☆</button>
+    </div>
+  </div>
   <div class="search-wrap" id="searchWrap">
     <input type="text" inputmode="search" class="search" id="search"
            placeholder="输入单词或变位，如 hablar、hablo、房子"
@@ -137,8 +209,7 @@ mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
   <div class="loading">加载中…</div>
 </main>
 
-<input type="file" class="file-input" id="fileInput"
-       accept=".xlsx,.xls,.csv" multiple>
+<input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv" multiple>
 
 <script>
 (function(){
@@ -172,26 +243,8 @@ function highlight(text, query, ia){
 }
 
 const PERSONS = ['yo', 'tú', 'usted', 'nosotros', 'vosotros', 'ustedes'];
-
-const TENSE_COLORS = [
-  { head:'#d8e5d2', cell:'#eff5ed' },
-  { head:'#d5e2ec', cell:'#eef4f8' },
-  { head:'#e3d8de', cell:'#f5f0f4' },
-  { head:'#e8e2d5', cell:'#f6f3ec' },
-  { head:'#dce6e2', cell:'#f0f5f3' },
-  { head:'#e6dde5', cell:'#f4eff3' },
-  { head:'#e8ddd3', cell:'#f5f0ea' },
-  { head:'#dde4e8', cell:'#f0f4f6' }
-];
-const colorFor = i => TENSE_COLORS[i % TENSE_COLORS.length];
-
-/* ============================================================
-   状态
-   ============================================================ */
-let VERBS = new Map();
-let WORDS = new Map();
-let WORDS_INDEX = new Map();
-let TENSE_COLS = [];
+const TENSE_CLASSES = ['t0','t1','t2','t3','t4','t5','t6','t7'];
+const clsFor = i => TENSE_CLASSES[i % TENSE_CLASSES.length];
 
 const TENSE_LABELS = {
   '陈述式现在时': '现在时',
@@ -200,6 +253,35 @@ const TENSE_LABELS = {
 };
 const tenseLabel = t => TENSE_LABELS[t] || t;
 
+/* ============================================================
+   首字母
+   ============================================================ */
+const LETTER_ORDER = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ#';
+function firstLetter(word){
+  const w = String(word || '').trim();
+  if (!w) return '#';
+  const raw = w[0];
+  const up = raw.toUpperCase();
+  if (up === 'Ñ') return 'Ñ';
+  const st = stripAccents(up);
+  if (/^[A-Z]$/.test(st)) return st;
+  return '#';
+}
+
+/* ============================================================
+   状态
+   ============================================================ */
+let VERBS = new Map();
+let WORDS = new Map();
+let WORDS_INDEX = new Map();
+let TENSE_COLS = [];
+let FAVS = new Set();
+let favOnly = false;
+let expanded = new Set();
+
+const FS_SCALES = [0.88, 0.94, 1, 1.06, 1.12];
+let fsIndex = 2;
+
 const els = {
   main: document.getElementById('main'),
   search: document.getElementById('search'),
@@ -207,8 +289,30 @@ const els = {
   searchWrap: document.getElementById('searchWrap'),
   ignoreAccents: document.getElementById('ignoreAccents'),
   stat: document.getElementById('stat'),
-  fileInput: document.getElementById('fileInput')
+  fileInput: document.getElementById('fileInput'),
+  btnTheme: document.getElementById('btnTheme'),
+  btnFontDown: document.getElementById('btnFontDown'),
+  btnFontUp: document.getElementById('btnFontUp'),
+  btnFav: document.getElementById('btnFav')
 };
+
+/* ============================================================
+   本地存储
+   ============================================================ */
+function loadFavs(){
+  try{
+    const raw = localStorage.getItem('fav-words');
+    if (raw) FAVS = new Set(JSON.parse(raw));
+  }catch(e){}
+}
+function saveFavs(){
+  try{ localStorage.setItem('fav-words', JSON.stringify(Array.from(FAVS))); }catch(e){}
+}
+function loadTheme(){
+  const dark = localStorage.getItem('dark-mode') === '1';
+  document.body.classList.toggle('dark', dark);
+  els.btnTheme.textContent = dark ? '☀️' : '🌙';
+}
 
 /* ============================================================
    解析 Excel
@@ -224,7 +328,6 @@ function sheetToRows(ws){
     return o;
   });
 }
-
 function parseAllSheets(buffer){
   const wb = XLSX.read(new Uint8Array(buffer), { type:'array', cellDates:true });
   const result = [];
@@ -234,7 +337,6 @@ function parseAllSheets(buffer){
   }
   return result;
 }
-
 function detectFileType(rows){
   if (!rows.length) return null;
   const cols = Object.keys(rows[0]);
@@ -242,28 +344,18 @@ function detectFileType(rows){
   if (cols.includes('单词')) return 'words';
   return null;
 }
-
 function buildVerbs(rows){
   const verbs = new Map();
   TENSE_COLS = [];
   if (!rows.length) return verbs;
-
   const cols = Object.keys(rows[0]);
-  const VERB_COL = '动词';
-  const PERSON_COL = '人称';
+  const VERB_COL = '动词', PERSON_COL = '人称';
   TENSE_COLS = cols.filter(c => c !== VERB_COL && c !== PERSON_COL && !isJunkCol(c));
-
-  let currentVerb = '';
-  let personIndex = 0;
-
+  let currentVerb = '', personIndex = 0;
   for (const row of rows){
     const v = String(row[VERB_COL] ?? '').trim();
-    if (v){
-      currentVerb = v;
-      personIndex = 0;
-    }
+    if (v){ currentVerb = v; personIndex = 0; }
     if (!currentVerb) continue;
-
     let person = String(row[PERSON_COL] ?? '').trim();
     if (person){
       const idx = PERSONS.indexOf(person.toLowerCase());
@@ -272,10 +364,7 @@ function buildVerbs(rows){
       person = PERSONS[personIndex % PERSONS.length];
     }
     personIndex++;
-
-    if (!verbs.has(currentVerb)){
-      verbs.set(currentVerb, { verb: currentVerb, rows: new Map() });
-    }
+    if (!verbs.has(currentVerb)) verbs.set(currentVerb, { verb: currentVerb, rows: new Map() });
     const data = verbs.get(currentVerb);
     const tenses = {};
     for (const t of TENSE_COLS) tenses[t] = String(row[t] ?? '').trim();
@@ -283,24 +372,17 @@ function buildVerbs(rows){
   }
   return verbs;
 }
-
 function buildWords(rows){
   const words = new Map();
   if (!rows.length) return words;
-
   const cols = Object.keys(rows[0]);
   const WORD_COL = cols.includes('单词') ? '单词' : cols[0];
-  const POS_COL = '词性';
-  const MEAN_COL = '意思';
-  const EX_COL = '例句';
-  const NOTE_COL = '备注';
-
+  const POS_COL = '词性', MEAN_COL = '意思', EX_COL = '例句', NOTE_COL = '备注';
   let currentWord = '';
   for (const row of rows){
     const w = String(row[WORD_COL] ?? '').trim();
     if (w) currentWord = w;
     if (!currentWord) continue;
-
     if (!words.has(currentWord)) words.set(currentWord, { word: currentWord, entries: [] });
     const entry = {
       pos: String(row[POS_COL] ?? '').trim(),
@@ -314,12 +396,10 @@ function buildWords(rows){
   }
   return words;
 }
-
 function rebuildWordsIndex(){
   WORDS_INDEX = new Map();
   for (const k of WORDS.keys()) WORDS_INDEX.set(stripAccents(k).toLowerCase(), k);
 }
-
 function findWord(word){
   if (!word) return null;
   if (WORDS.has(word)) return WORDS.get(word);
@@ -331,17 +411,13 @@ function findWord(word){
 }
 
 /* ============================================================
-   搜索
+   搜索（五列）
    ============================================================ */
 function search(query, ia){
   const q = norm(query, ia).trim();
   const results = [];
   const seen = new Set();
-
-  if (!q){
-    for (const data of VERBS.values()) results.push({ type:'verb', data, rank:9 });
-    return results;
-  }
+  if (!q) return results;
 
   for (const data of VERBS.values()){
     const vn = norm(data.verb, ia);
@@ -351,24 +427,23 @@ function search(query, ia){
     else if (vn.includes(q)) rank = 2;
 
     if (rank >= 0){
-      results.push({ type:'verb', data, rank });
+      results.push({ word:data.verb, rank, match:null });
       seen.add(data.verb);
       continue;
     }
-
     let found = null;
     outer:
     for (const [person, tenses] of data.rows){
       for (const t of TENSE_COLS){
         const form = tenses[t];
         if (form && norm(form, ia).includes(q)){
-          found = { person, tense:t, form };
+          found = { person, tense:t };
           break outer;
         }
       }
     }
     if (found){
-      results.push({ type:'verb', data, match:found, rank:3 });
+      results.push({ word:data.verb, rank:3, match:found });
       seen.add(data.verb);
     }
   }
@@ -381,11 +456,17 @@ function search(query, ia){
     else if (wn.startsWith(q)) rank = 1;
     else if (wn.includes(q)) rank = 2;
     else {
+      // 查其他四列
       for (const e of data.entries){
-        if (e.meaning && norm(e.meaning, ia).includes(q)){ rank = 4; break; }
+        if (norm(e.pos, ia).includes(q) ||
+            norm(e.meaning, ia).includes(q) ||
+            norm(e.example, ia).includes(q) ||
+            norm(e.note, ia).includes(q)){
+          rank = 4; break;
+        }
       }
     }
-    if (rank >= 0) results.push({ type:'word', data, rank });
+    if (rank >= 0) results.push({ word:data.word, rank, match:null });
   }
 
   results.sort((a,b) => a.rank - b.rank);
@@ -395,7 +476,7 @@ function search(query, ia){
 /* ============================================================
    渲染
    ============================================================ */
-function renderWordInfo(wordData, query, ia, showExtra){
+function renderWordInfo(wordData, query, ia){
   const info = document.createElement('div');
   info.className = 'word-info';
   for (const e of wordData.entries){
@@ -408,13 +489,13 @@ function renderWordInfo(wordData, query, ia, showExtra){
       row.innerHTML = html;
       info.appendChild(row);
     }
-    if (showExtra && e.example){
+    if (e.example){
       const ex = document.createElement('div');
       ex.className = 'example';
       ex.innerHTML = highlight(e.example, query, ia);
       info.appendChild(ex);
     }
-    if (showExtra && e.note){
+    if (e.note){
       const note = document.createElement('div');
       note.className = 'note';
       note.innerHTML = '📝 ' + highlight(e.note, query, ia);
@@ -424,33 +505,15 @@ function renderWordInfo(wordData, query, ia, showExtra){
   return info;
 }
 
-function renderVerbCard(data, query, ia, match){
-  const card = document.createElement('div');
-  card.className = 'card';
-
-  const title = document.createElement('div');
-  title.className = 'card-title';
-  const badge = match
-    ? `<span class="badge">${escapeHtml(match.person)} · ${escapeHtml(tenseLabel(match.tense))}</span>`
-    : '';
-  title.innerHTML = highlight(data.verb, query, ia) + badge;
-  card.appendChild(title);
-
-  const wordData = findWord(data.verb);
-  if (wordData && wordData.entries.length){
-    card.appendChild(renderWordInfo(wordData, query, ia, true));
-  }
-
+function renderConjTable(data, query, ia){
   const scroll = document.createElement('div');
   scroll.className = 'table-scroll';
-
   const table = document.createElement('table');
   table.className = 'conj-table';
 
   let headHtml = '<th class="person">人称</th>';
   TENSE_COLS.forEach((t, i) => {
-    const c = colorFor(i);
-    headHtml += `<th style="background:${c.head}">${escapeHtml(tenseLabel(t))}</th>`;
+    headHtml += `<th class="${clsFor(i)}">${escapeHtml(tenseLabel(t))}</th>`;
   });
   table.innerHTML = `<thead><tr>${headHtml}</tr></thead>`;
 
@@ -465,32 +528,150 @@ function renderVerbCard(data, query, ia, match){
       if (!form){
         html += `<td class="form empty">—</td>`;
       } else {
-        const c = colorFor(i);
-        html += `<td class="form" style="background:${c.cell}">${highlight(form, query, ia)}</td>`;
+        html += `<td class="form ${clsFor(i)}">${highlight(form, query, ia)}</td>`;
       }
     });
     tr.innerHTML = html;
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
-
   scroll.appendChild(table);
-  card.appendChild(scroll);
-
-  return card;
+  return scroll;
 }
 
-function renderWordCard(data, query, ia){
+function buildCard(word, query, ia, match){
+  const vData = VERBS.get(word);
+  const wData = findWord(word);
+
   const card = document.createElement('div');
   card.className = 'card';
 
   const title = document.createElement('div');
   title.className = 'card-title';
-  title.innerHTML = highlight(data.word, query, ia);
+  const badge = match
+    ? `<span class="badge">${escapeHtml(match.person)} · ${escapeHtml(tenseLabel(match.tense))}</span>`
+    : '';
+  title.innerHTML = highlight(word, query, ia) + badge;
+
+  const star = document.createElement('button');
+  star.className = 'star' + (FAVS.has(word) ? ' on' : '');
+  star.textContent = FAVS.has(word) ? '★' : '☆';
+  star.title = FAVS.has(word) ? '取消收藏' : '收藏';
+  star.onclick = e => { e.stopPropagation(); toggleFav(word); };
+  title.appendChild(star);
   card.appendChild(title);
 
-  card.appendChild(renderWordInfo(data, query, ia, true));
+  if (wData && wData.entries.length){
+    card.appendChild(renderWordInfo(wData, query, ia));
+  }
+  if (vData){
+    card.appendChild(renderConjTable(vData, query, ia));
+  }
   return card;
+}
+
+function toggleFav(word){
+  if (FAVS.has(word)) FAVS.delete(word);
+  else FAVS.add(word);
+  saveFavs();
+  render();
+}
+
+function allWordKeys(){
+  const set = new Set();
+  for (const k of WORDS.keys()) set.add(k);
+  for (const k of VERBS.keys()) set.add(k);
+  return Array.from(set);
+}
+
+function getMeaning(word){
+  const w = findWord(word);
+  if (!w || !w.entries.length) return '';
+  const arr = w.entries.map(e => e.meaning).filter(Boolean);
+  return arr.join('；');
+}
+
+function renderGroupedList(){
+  els.main.innerHTML = '';
+  let words = allWordKeys();
+  if (favOnly) words = words.filter(w => FAVS.has(w));
+
+  if (!words.length){
+    els.main.innerHTML = favOnly
+      ? `<div class="empty-state"><div class="emoji">⭐</div>还没有收藏任何词<br>点卡片标题右边的星星收藏</div>`
+      : `<div class="empty-state"><div class="emoji">📭</div>还没有数据</div>`;
+    els.stat.textContent = '';
+    return;
+  }
+
+  const groups = new Map();
+  for (const w of words){
+    const L = firstLetter(w);
+    if (!groups.has(L)) groups.set(L, []);
+    groups.get(L).push(w);
+  }
+  const keys = Array.from(groups.keys()).sort(
+    (a,b) => LETTER_ORDER.indexOf(a) - LETTER_ORDER.indexOf(b)
+  );
+
+  const ia = els.ignoreAccents.checked;
+  const frag = document.createDocumentFragment();
+
+  for (const k of keys){
+    const list = groups.get(k).sort((a,b) => a.localeCompare(b, 'es'));
+    const group = document.createElement('div');
+    group.className = 'letter-group';
+
+    const head = document.createElement('div');
+    head.className = 'letter-head';
+    head.textContent = k;
+    group.appendChild(head);
+
+    for (const w of list){
+      const isExp = expanded.has(w);
+      const item = document.createElement('div');
+      item.className = 'list-item' + (isExp ? ' expanded' : '');
+      item.dataset.word = w;
+      const mean = getMeaning(w);
+      item.innerHTML = `<span class="li-word">${escapeHtml(w)}</span><span class="li-mean">${escapeHtml(mean)}</span>`;
+      item.onclick = () => {
+        if (expanded.has(w)) expanded.delete(w);
+        else expanded.add(w);
+        renderGroupedList();
+        const el = document.querySelector(`[data-word="${CSS.escape(w)}"]`);
+        if (el) el.scrollIntoView({ block:'nearest' });
+      };
+      group.appendChild(item);
+      if (isExp) group.appendChild(buildCard(w, '', ia, null));
+    }
+    frag.appendChild(group);
+  }
+  els.main.appendChild(frag);
+  els.stat.textContent = favOnly
+    ? `收藏 ${words.length} 个`
+    : `${words.length} 个词条`;
+}
+
+function renderSearchResults(query, ia){
+  const results = search(query, ia);
+  let filtered = results;
+  if (favOnly) filtered = results.filter(r => FAVS.has(r.word));
+
+  if (filtered.length === 0){
+    els.main.innerHTML = favOnly
+      ? `<div class="empty-state"><div class="emoji">⭐</div>收藏里没有「${escapeHtml(query)}」</div>`
+      : `<div class="empty-state"><div class="emoji">🔍</div>没有找到「${escapeHtml(query)}」</div>`;
+    els.stat.textContent = '0 个结果';
+    return;
+  }
+
+  els.main.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  for (const r of filtered){
+    frag.appendChild(buildCard(r.word, query, ia, r.match));
+  }
+  els.main.appendChild(frag);
+  els.stat.textContent = `${filtered.length} 个结果`;
 }
 
 function renderUploadPrompt(){
@@ -504,36 +685,19 @@ function renderUploadPrompt(){
 }
 
 function render(){
-  const query = els.search.value.trim();
-  const ia = els.ignoreAccents.checked;
-  els.searchWrap.classList.toggle('has-value', !!query);
-
   if (VERBS.size === 0 && WORDS.size === 0){
     renderUploadPrompt();
     return;
   }
+  const query = els.search.value.trim();
+  const ia = els.ignoreAccents.checked;
+  els.searchWrap.classList.toggle('has-value', !!query);
 
-  const results = search(query, ia);
-
-  if (results.length === 0){
-    els.main.innerHTML =
-      `<div class="empty-state"><div class="emoji">🔍</div>没有找到「${escapeHtml(query)}」</div>`;
-    els.stat.textContent = '0 个结果';
-    return;
+  if (!query){
+    renderGroupedList();
+  } else {
+    renderSearchResults(query, ia);
   }
-
-  els.main.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  for (const r of results){
-    frag.appendChild(r.type === 'verb'
-      ? renderVerbCard(r.data, query, ia, r.match)
-      : renderWordCard(r.data, query, ia));
-  }
-  els.main.appendChild(frag);
-
-  els.stat.textContent = query
-    ? `${results.length} 个结果`
-    : `${VERBS.size} 个动词`;
 }
 
 /* ============================================================
@@ -548,15 +712,13 @@ function absorbSheets(sheets){
   }
   return got;
 }
-
 async function loadSingleFromUrl(url){
   try{
-    const res = await fetch(url, { cache:'no-store' });
+    const res = await fetch(url + '?t=' + Date.now(), { cache:'no-store' });
     if (!res.ok) return false;
     return absorbSheets(parseAllSheets(await res.arrayBuffer()));
   }catch(e){ return false; }
 }
-
 async function loadSingleFromFile(file){
   return absorbSheets(parseAllSheets(await file.arrayBuffer()));
 }
@@ -569,14 +731,39 @@ els.search.addEventListener('input', () => {
   clearTimeout(timer);
   timer = setTimeout(render, 120);
 });
-
 els.clear.addEventListener('click', () => {
   els.search.value = '';
   els.search.focus();
   render();
 });
-
 els.ignoreAccents.addEventListener('change', render);
+
+els.btnTheme.onclick = () => {
+  const dark = !document.body.classList.contains('dark');
+  document.body.classList.toggle('dark', dark);
+  els.btnTheme.textContent = dark ? '☀️' : '🌙';
+  try{ localStorage.setItem('dark-mode', dark ? '1' : '0'); }catch(e){}
+};
+
+els.btnFontUp.onclick = () => {
+  if (fsIndex < FS_SCALES.length - 1){
+    fsIndex++;
+    document.documentElement.style.setProperty('--fs', FS_SCALES[fsIndex]);
+  }
+};
+els.btnFontDown.onclick = () => {
+  if (fsIndex > 0){
+    fsIndex--;
+    document.documentElement.style.setProperty('--fs', FS_SCALES[fsIndex]);
+  }
+};
+
+els.btnFav.onclick = () => {
+  favOnly = !favOnly;
+  els.btnFav.classList.toggle('on', favOnly);
+  els.btnFav.textContent = favOnly ? '★' : '☆';
+  render();
+};
 
 els.fileInput.addEventListener('change', async e => {
   const files = Array.from(e.target.files);
@@ -596,10 +783,12 @@ els.fileInput.addEventListener('change', async e => {
 /* ============================================================
    启动
    ============================================================ */
+loadFavs();
+loadTheme();
+document.documentElement.style.setProperty('--fs', FS_SCALES[fsIndex]);
+
 (async function init(){
-  // 优先读合并后的单文件
   const ok = await loadSingleFromUrl('spanish.xlsx');
-  // 兼容旧结构（如果单文件还没上传）
   if (!ok){
     await loadSingleFromUrl('conj.xlsx');
     await loadSingleFromUrl('words.xlsx');
